@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Officer Dashboard</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome, Officer</h2>
+
+    <section>
+      <h3>Create New Service</h3>
+      <input type="text" id="serviceName" placeholder="Service Name" />
+      <textarea id="serviceDesc" placeholder="Service Description"></textarea>
+      <button onclick="createService()">Add Service</button>
+      <p id="serviceMsg"></p>
+    </section>
+
+    <section>
+      <h3>Existing Services</h3>
+      <div id="servicesList"></div>
+    </section>
+
+    <section>
+      <h3>User Applications</h3>
+      <div id="applicationsList"></div>
+    </section>
+
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "../js/firebase.js";
+    import {
+      collection, addDoc, getDocs, doc, updateDoc, deleteDoc
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import {
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const servicesList = document.getElementById("servicesList");
+    const applicationsList = document.getElementById("applicationsList");
+    const serviceMsg = document.getElementById("serviceMsg");
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "../login.html";
+        return;
+      }
+      loadServices();
+      loadApplications();
+    });
+
+    // Create new service
+    window.createService = async function () {
+      const name = document.getElementById("serviceName").value;
+      const desc = document.getElementById("serviceDesc").value;
+
+      if (!name || !desc) {
+        serviceMsg.innerText = "Please fill both fields.";
+        return;
+      }
+
+      await addDoc(collection(db, "services"), {
+        name,
+        description: desc,
+        createdAt: new Date().toISOString()
+      });
+
+      serviceMsg.innerText = "✅ Service added successfully!";
+      document.getElementById("serviceName").value = "";
+      document.getElementById("serviceDesc").value = "";
+      loadServices();
+    };
+
+    // Load services
+    async function loadServices() {
+      const snapshot = await getDocs(collection(db, "services"));
+      servicesList.innerHTML = "";
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        servicesList.innerHTML += `
+          <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+            <strong>${data.name}</strong><br>${data.description}<br/>
+            <button onclick="deleteService('${docSnap.id}')">Delete</button>
+          </div>
+        `;
+      });
+    }
+
+    // Delete service
+    window.deleteService = async function (id) {
+      await deleteDoc(doc(db, "services", id));
+      loadServices();
+    };
+
+    // Load user applications
+    async function loadApplications() {
+      const apps = await getDocs(collection(db, "applications"));
+      applicationsList.innerHTML = "";
+      apps.forEach(appDoc => {
+        const app = appDoc.data();
+        applicationsList.innerHTML += `
+          <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+            <strong>${app.serviceName}</strong><br/>
+            User ID: ${app.userId}<br/>
+            Status: <b>${app.status}</b><br/>
+            <button onclick="updateStatus('${appDoc.id}', 'Approved')">Approve</button>
+            <button onclick="updateStatus('${appDoc.id}', 'Rejected')">Reject</button>
+          </div>
+        `;
+      });
+    }
+
+    // Update application status
+    window.updateStatus = async function (id, newStatus) {
+      await updateDoc(doc(db, "applications", id), {
+        status: newStatus
+      });
+      loadApplications();
+    };
+
+    // Logout
+    window.logout = function () {
+      signOut(auth).then(() => {
+        window.location.href = "../login.html";
+      });
+    };
+  </script>
+</body>
+</html>

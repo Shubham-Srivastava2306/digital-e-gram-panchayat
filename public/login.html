@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | E Gram Panchayat</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Login</h2>
+    
+    <select id="role">
+      <option value="user">User</option>
+      <option value="staff">Staff</option>
+      <option value="officer">Officer</option>
+    </select>
+    
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    
+    <button onclick="login()">Login</button>
+    <p id="error-msg"></p>
+    
+    <p>New user? <a href="register.html">Register here</a></p>
+  </div>
+
+  <script type="module" src="js/auth.js"></script>
+</body>
+</html>

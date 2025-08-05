@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register | E Gram Panchayat</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Register (User)</h2>
+    <input type="text" id="name" placeholder="Full Name" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <input type="text" id="aadhaar" placeholder="Aadhaar Number" maxlength="12" required />
+    <textarea id="address" placeholder="Address" required></textarea>
+    <button onclick="register()">Register</button>
+    <p id="error-msg"></p>
+    <p>Already registered? <a href="login.html">Login here</a></p>
+  </div>
+
+  <script type="module" src="js/auth.js"></script>
+</body>
+</html>

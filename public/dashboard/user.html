@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome to User Dashboard</h2>
+
+    <ul>
+      <li><a href="apply.html">📝 Apply for Services</a></li>
+      <li><a href="status.html">📄 My Application Status</a></li>
+      <li><a href="#" onclick="loadProfile()">👤 My Profile</a></li>
+      <li><button onclick="logout()">🚪 Logout</button></li>
+    </ul>
+
+    <div id="profileInfo" style="margin-top: 20px;"></div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "../js/firebase.js";
+    import {
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import {
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const profileDiv = document.getElementById("profileInfo");
+
+    // Load profile
+    window.loadProfile = async function () {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        profileDiv.innerHTML = `
+          <h3>My Profile</h3>
+          <p><strong>Name:</strong> ${data.name}</p>
+          <p><strong>Email:</strong> ${data.email}</p>
+          <p><strong>Aadhaar:</strong> ${data.aadhaar}</p>
+          <p><strong>Address:</strong> ${data.address}</p>
+          <p><strong>Role:</strong> ${data.role}</p>
+        `;
+      }
+    };
+
+    // Logout
+    window.logout = function () {
+      signOut(auth).then(() => {
+        window.location.href = "../login.html";
+      });
+    };
+  </script>
+</body>
+</html>
