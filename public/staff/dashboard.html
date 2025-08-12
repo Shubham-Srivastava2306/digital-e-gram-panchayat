@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Staff Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f9fc;
+      padding: 30px;
+      color: #333;
+    }
+
+    h2 {
+      color: #1976d2;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    li {
+      margin-bottom: 15px;
+      padding: 12px;
+      background-color: #f1f5f9;
+      border-radius: 6px;
+    }
+
+    .app-actions {
+      margin-top: 10px;
+    }
+
+    button {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    button:hover {
+      background-color: #145aa0;
+    }
+
+    .danger {
+      background-color: #e74c3c;
+    }
+
+    .danger:hover {
+      background-color: #c0392b;
+    }
+
+    .logout {
+      text-align: center;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Staff Dashboard</h2>
+
+  <section>
+    <h3>User Applications</h3>
+    <ul id="applicationsList">Loading...</ul>
+  </section>
+
+  <div class="logout">
+    <button class="danger" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB7YNfSUH7JxTcIml7ex5mE9AGUG8pwIpE",
+      authDomain: "digital-e-gram-panchayat-4533d.firebaseapp.com",
+      projectId: "digital-e-gram-panchayat-4533d",
+      storageBucket: "digital-e-gram-panchayat-4533d.firebasestorage.app",
+      messagingSenderId: "815654739509",
+      appId: "1:815654739509:web:187ed962ad73d376499b7c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const applicationsList = document.getElementById("applicationsList");
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "../login.html";
+      } else {
+        loadApplications();
+      }
+    });
+
+    async function loadApplications() {
+      applicationsList.innerHTML = "";
+      const apps = await db.collection("applications").get();
+      if (apps.empty) {
+        applicationsList.innerHTML = "<li>No applications found</li>";
+        return;
+      }
+
+      for (const app of apps.docs) {
+        const appData = app.data();
+        const userId = appData.userId;
+        const serviceId = appData.serviceId;
+        const status = appData.status;
+
+        try {
+          const serviceDoc = await db.collection("services").doc(serviceId).get();
+          const serviceName = serviceDoc.exists ? serviceDoc.data().name : "Unknown Service";
+
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <strong>Service:</strong> ${serviceName}<br>
+            <strong>User ID:</strong> ${userId}<br>
+            <strong>Status:</strong> ${status}
+          `;
+
+          if (status === "Pending") {
+            const actionDiv = document.createElement("div");
+            actionDiv.classList.add("app-actions");
+            actionDiv.innerHTML = `
+              <button onclick="updateStatus('${app.id}', 'Approved')">Approve</button>
+              <button class="danger" onclick="updateStatus('${app.id}', 'Rejected')">Reject</button>
+            `;
+            li.appendChild(actionDiv);
+          }
+
+          applicationsList.appendChild(li);
+        } catch (e) {
+          console.error("Error loading service:", e);
+        }
+      }
+    }
+
+    async function updateStatus(appId, status) {
+      await db.collection("applications").doc(appId).update({ status });
+      alert(`Application ${status}`);
+      loadApplications();
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = "../login.html";
+      });
+    }
+  </script>
+</body>
+</html>

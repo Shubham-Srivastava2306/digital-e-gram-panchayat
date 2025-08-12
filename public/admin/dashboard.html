@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f8fb;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    h2, h3 {
+      color: #1565c0;
+      text-align: center;
+    }
+    input {
+      padding: 10px;
+      width: 100%;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 8px 14px;
+      margin: 5px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #0d47a1;
+    }
+    .reject {
+      background-color: #e53935;
+    }
+    .reject:hover {
+      background-color: #b71c1c;
+    }
+    .green {
+      background-color: #388e3c;
+    }
+    .green:hover {
+      background-color: #2e7d32;
+    }
+    .section {
+      margin-top: 30px;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background: #f9f9f9;
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .top-right {
+      text-align: right;
+    }
+    .logout-btn {
+      background-color: #e53935;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-right">
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <h2>Welcome, Admin</h2>
+
+   
+
+    <!-- ➕ Add Service -->
+    <div class="section">
+      <h3>Add New Service</h3>
+      <form id="addServiceForm">
+        <input type="text" id="serviceName" placeholder="Service Name" required />
+        <input type="text" id="serviceDescription" placeholder="Service Description" required />
+        <button type="submit">Add Service</button>
+      </form>
+    </div>
+
+    <!-- 🔧 Manage Services -->
+    <div class="section">
+      <h3>Manage Services</h3>
+      <ul id="servicesList">Loading...</ul>
+    </div>
+
+    <!-- 📄 Manage Applications -->
+    <div class="section">
+      <h3>Manage Applications</h3>
+      <ul id="applicationsList">Loading...</ul>
+    </div>
+  </div>
+   <!-- 🔗 Link to Add User Page -->
+    <div style="text-align: center; margin-bottom: 20px;">
+      <a href="admin-add-user.html">
+        <button class="green">➕ Add New User</button>
+      </a>
+    </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB7YNfSUH7JxTcIml7ex5mE9AGUG8pwIpE",
+      authDomain: "digital-e-gram-panchayat-4533d.firebaseapp.com",
+      projectId: "digital-e-gram-panchayat-4533d",
+      storageBucket: "digital-e-gram-panchayat-4533d.firebasestorage.app",
+      messagingSenderId: "815654739509",
+      appId: "1:815654739509:web:187ed962ad73d376499b7c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) return window.location.href = "../login.html";
+      const doc = await db.collection("users").doc(user.uid).get();
+      if (!doc.exists || doc.data().role !== "admin") {
+        alert("Access Denied");
+        return window.location.href = "../login.html";
+      }
+      loadServices();
+      loadApplications();
+    });
+
+    // ➕ Add Service
+    document.getElementById("addServiceForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("serviceName").value.trim();
+      const description = document.getElementById("serviceDescription").value.trim();
+      if (!name || !description) return alert("Please fill all fields.");
+      await db.collection("services").add({ name, description });
+      alert("Service added successfully!");
+      e.target.reset();
+      loadServices();
+    });
+
+    // 🔃 Load Services
+    async function loadServices() {
+      const list = document.getElementById("servicesList");
+      list.innerHTML = "";
+      const snapshot = await db.collection("services").get();
+      if (snapshot.empty) return list.innerHTML = "<li>No services available.</li>";
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <strong>${data.name}</strong><br>${data.description}<br>
+          <button onclick="editService('${doc.id}', '${data.name}', '${data.description}')">Edit</button>
+          <button class="reject" onclick="deleteService('${doc.id}')">Delete</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    async function editService(id, oldName, oldDesc) {
+      const name = prompt("Edit service name:", oldName);
+      if (!name) return;
+      const description = prompt("Edit description:", oldDesc);
+      if (!description) return;
+      await db.collection("services").doc(id).update({ name, description });
+      alert("Service updated!");
+      loadServices();
+    }
+
+    async function deleteService(id) {
+      if (confirm("Delete this service?")) {
+        await db.collection("services").doc(id).delete();
+        loadServices();
+      }
+    }
+
+    // 🔃 Load Applications
+    async function loadApplications() {
+      const list = document.getElementById("applicationsList");
+      list.innerHTML = "";
+      const snapshot = await db.collection("applications").get();
+      if (snapshot.empty) return list.innerHTML = "<li>No applications submitted.</li>";
+
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        const appId = doc.id;
+        let serviceName = "Unknown";
+
+        try {
+          const serviceDoc = await db.collection("services").doc(data.serviceId).get();
+          if (serviceDoc.exists) serviceName = serviceDoc.data().name;
+        } catch {}
+
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <strong>User:</strong> ${data.userId}<br>
+          <strong>Service:</strong> ${serviceName}<br>
+          <strong>Status:</strong> ${data.status}
+        `;
+
+        if (data.status === "Pending") {
+          const approveBtn = document.createElement("button");
+          approveBtn.textContent = "Approve";
+          approveBtn.onclick = () => updateStatus(appId, "Approved");
+
+          const rejectBtn = document.createElement("button");
+          rejectBtn.textContent = "Reject";
+          rejectBtn.className = "reject";
+          rejectBtn.onclick = () => updateStatus(appId, "Rejected");
+
+          li.appendChild(approveBtn);
+          li.appendChild(rejectBtn);
+        }
+
+        list.appendChild(li);
+      }
+    }
+
+    async function updateStatus(id, status) {
+      if (!confirm(`Confirm to mark as ${status}?`)) return;
+      await db.collection("applications").doc(id).update({ status });
+      alert(`Application ${status}`);
+      loadApplications();
+    }
+
+    // 🔐 Logout
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = "../login.html";
+      });
+    }
+  </script>
+</body>
+</html>

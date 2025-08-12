@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <style>
+    body {
+      background-color: #e3f2fd;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-box {
+      background-color: #ffffff;
+      border: 2px solid #1976d2;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 350px;
+    }
+
+    .login-box h2 {
+      text-align: center;
+      color: #1976d2;
+      margin-bottom: 20px;
+    }
+
+    .login-box input,
+    .login-box select,
+    .login-box button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .login-box button {
+      background-color: #1976d2;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+
+    #loginStatus {
+      color: red;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .register-link a {
+      color: #1976d2;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
+      
+      <select id="role" required>
+        <option value="">Select Role</option>
+        <option value="user">User</option>
+        <option value="staff">Staff</option>
+        <option value="admin">Admin</option>
+      </select>
+
+      <button type="submit">Login</button>
+    </form>
+    <p id="loginStatus"></p>
+
+    <!-- 👉 Link to Register -->
+    <div class="register-link">
+      Don't have an account? <a href="register.html">Register here</a>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB7YNfSUH7JxTcIml7ex5mE9AGUG8pwIpE",
+      authDomain: "digital-e-gram-panchayat-4533d.firebaseapp.com",
+      projectId: "digital-e-gram-panchayat-4533d",
+      storageBucket: "digital-e-gram-panchayat-4533d.firebasestorage.app",
+      messagingSenderId: "815654739509",
+      appId: "1:815654739509:web:187ed962ad73d376499b7c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+  </script>
+
+  <!-- Login Script -->
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const role = document.getElementById("role").value;
+
+      if (!role) {
+        document.getElementById("loginStatus").innerText = "Please select a role.";
+        return;
+      }
+
+      try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        console.log("Logged in:", user.email, "Role:", role);
+
+        // 🔁 Redirect based on selected role
+        if (role === "admin") {
+          window.location.href = "admin/dashboard.html";
+        } else if (role === "staff") {
+          window.location.href = "staff/dashboard.html";
+        } else {
+          window.location.href = "user/dashboard.html";
+        }
+
+      } catch (error) {
+        document.getElementById("loginStatus").innerText = "Login failed: " + error.message;
+      }
+    });
+  </script>
+</body>
+</html>
