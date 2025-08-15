@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Add New User - Admin Panel</title>
   <style>
     body {
@@ -21,6 +22,8 @@
       border-radius: 12px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
       width: 400px;
+      max-width: 95vw;
+      box-sizing: border-box;
     }
 
     h2 {
@@ -37,6 +40,27 @@
       border: 1px solid #ccc;
       box-sizing: border-box;
       font-size: 16px;
+    }
+    @media (max-width: 500px) {
+      body {
+        padding: 10px;
+        height: auto;
+      }
+      .form-container {
+        padding: 16px 6px;
+        width: 100%;
+        max-width: 99vw;
+      }
+      h2 {
+        font-size: 20px;
+      }
+      input, select, button {
+        font-size: 15px;
+        padding: 10px;
+      }
+      .back-link {
+        font-size: 14px;
+      }
     }
 
     button {

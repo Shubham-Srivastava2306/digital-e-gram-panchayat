@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
   <style>
     body {
@@ -20,6 +21,8 @@
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       width: 350px;
+      max-width: 95vw;
+      box-sizing: border-box;
     }
 
     .login-box h2 {
@@ -36,6 +39,30 @@
       margin-top: 10px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    @media (max-width: 500px) {
+      body {
+        padding: 10px;
+        height: auto;
+      }
+      .login-box {
+        padding: 16px 6px;
+        width: 100%;
+        max-width: 99vw;
+      }
+      .login-box h2 {
+        font-size: 20px;
+      }
+      .login-box input,
+      .login-box select,
+      .login-box button {
+        font-size: 15px;
+        padding: 9px;
+      }
+      .register-link {
+        font-size: 14px;
+      }
     }
 
     .login-box button {

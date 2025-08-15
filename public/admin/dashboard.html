@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard</title>
   <style>
     body {
@@ -17,6 +18,31 @@
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+    }
+    @media (max-width: 700px) {
+      .container {
+        padding: 12px 4px;
+        max-width: 99vw;
+      }
+      h2, h3 {
+        font-size: 20px;
+      }
+      input {
+        font-size: 15px;
+        padding: 8px;
+      }
+      button {
+        font-size: 15px;
+        padding: 7px 10px;
+      }
+      li {
+        font-size: 15px;
+        padding: 10px;
+      }
+      .section {
+        margin-top: 18px;
+      }
     }
     h2, h3 {
       color: #1565c0;

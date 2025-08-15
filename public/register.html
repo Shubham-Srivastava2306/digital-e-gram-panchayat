@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Register</title>
   <style>
     body {
@@ -19,6 +20,8 @@
       border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       width: 300px;
+      max-width: 95vw;
+      box-sizing: border-box;
     }
 
     input, button {
@@ -27,6 +30,28 @@
       padding: 10px;
       font-size: 16px;
       border-radius: 5px;
+      box-sizing: border-box;
+    }
+    @media (max-width: 500px) {
+      body {
+        padding: 10px;
+        height: auto;
+      }
+      .box {
+        padding: 16px 6px;
+        width: 100%;
+        max-width: 99vw;
+      }
+      h3 {
+        font-size: 20px;
+      }
+      input, button {
+        font-size: 15px;
+        padding: 9px;
+      }
+      p {
+        font-size: 14px;
+      }
     }
 
     button {
